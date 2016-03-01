@@ -13,6 +13,7 @@ class Unirest
     private static $verifyPeer = true;
     private static $socketTimeout = null;
     private static $defaultHeaders = array();
+    private static $cookieFile = null;
 
     private static $auth = array (
         'user' => '',
@@ -31,6 +32,15 @@ class Unirest
             'method' => CURLAUTH_BASIC
         )
     );
+    
+    /**
+	 * Set cookie file for enable cookie handling
+	 * @param string $cookieFile - correct path to file with permission to write to them
+	 */
+	public static function cookieFile($cookieFile)
+	{
+		self::$cookieFile = $cookieFile;
+	}
 
     /**
      * Set JSON decode mode
@@ -402,6 +412,13 @@ class Unirest
                 CURLOPT_PROXYAUTH       => self::$proxy['auth']['method'],
                 CURLOPT_PROXYUSERPWD    => self::$proxy['auth']['user'] . ':' . self::$proxy['auth']['pass']
             ));
+        }
+        
+        if (self::$cookieFile) {
+			curl_setopt_array(self::$handle, array(
+				curl_setopt(self::$handle, CURLOPT_COOKIEFILE, self::$cookieFile),
+				curl_setopt(self::$handle, CURLOPT_COOKIEJAR, self::$cookieFile)
+			));
         }
 
         $response   = curl_exec(self::$handle);
